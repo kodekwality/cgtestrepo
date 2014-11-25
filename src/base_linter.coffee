@@ -24,7 +24,7 @@ module.exports = class BaseLinter
             parentTree.path is changedFileTree.path
 
           streamCommitContent parentTree, (err, parentFileSize, parentFileContents) ->
-            return eachFileCb err if err
+            eachFileCb err
 
             streamCommitContent changedFileTree, (err, fileSize, fileContents) ->
               return eachFileCb err if err
