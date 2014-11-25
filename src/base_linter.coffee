@@ -19,19 +19,20 @@ module.exports = class BaseLinter
     # Create an error object for the given rule with the given
     # attributes.
     createError: (ruleName, attrs = {}) ->
+        async.each changedFilesTree, (changedFileTree, eachFileCb) ->
+          parentTree = _.find parentRecursiveTree, (parentTree) ->
+            parentTree.path is changedFileTree.path
 
-        # Level should default to what's in the config, but can be overridden.
-        attrs.level ?= @config[ruleName].level
+          streamCommitContent parentTree, (err, parentFileSize, parentFileContents) ->
+            return eachFileCb err if err
 
-        level = attrs.level
-        if level not in ['ignore', 'warn', 'error']
-            throw new Error("unknown level #{level}")
+            streamCommitContent changedFileTree, (err, fileSize, fileContents) ->
+              return eachFileCb err if err
 
-        if level in ['error', 'warn']
-            attrs.rule = ruleName
-            return defaults(attrs, @config[ruleName])
-        else
-            null
+              levenDelta =  leven fileContents, parentFileContents
+              contentDiff = diff parentFileContents, fileContents
+
+              statsObject.changed.delta += levenDelta
 
     acceptRule: (rule) ->
         throw new Error "acceptRule needs to be overridden in the subclass"
