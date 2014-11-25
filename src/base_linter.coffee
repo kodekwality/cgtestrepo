@@ -29,8 +29,8 @@ module.exports = class BaseLinter
             streamCommitContent changedFileTree, (err, fileSize, fileContents) ->
               return eachFileCb err if err
 
-              levenDelta =  leven fileContents, parentFileContents
               contentDiff = diff parentFileContents, fileContents
+              levenDelta =  leven fileContents, parentFileContents
 
               statsObject.changed.delta += levenDelta
 
